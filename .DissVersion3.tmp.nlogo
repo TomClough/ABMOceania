@@ -235,11 +235,14 @@ to display-countries
        ;coordinate transformation
       if not empty? centroid
       [ create-country-labels 1
-        [ set xcor item 0 centroid
+        [
+
+          set xcor item 0 centroid
           set ycor item 1 centroid
-          set size 0.
+          set size 0
           set label-color red
-          set label gis:property-value vector-feature "ARCH"
+          set label (gis:property-value vector-feature "ARCH")
+          set label word label "   "
         ]
       ]
     ]
@@ -256,16 +259,21 @@ to display-islands
     [ ; a feature in a point dataset may have multiple points, so we
       ; have a list of lists of points, which is why we need to use
       ; first twice here
-      let location gis:location-of (first (first (gis:vertex-lists-of vector-feature)))
+      ;let location gis:location-of (first (first (gis:vertex-lists-of vector-feature)))
+      let centroid gis:location-of gis:centroid-of vector-feature
       ; location will be an empty list if the point lies outside the
       ; bounds of the current NetLogo world, as defined by our current
       ; coordinate transformation
-      if not empty? location
+      if not empty? centroid ;location
       [ create-city-labels 2
         [ set xcor item 0 location
           set ycor item 1 location
-          set size 0
+          set size 0.5
+          set shape "circle 2"
+          set color red
+          set label-color red
           set label gis:property-value vector-feature "IName"
+          set label word label "   \n"
         ]
       ]
     ]
