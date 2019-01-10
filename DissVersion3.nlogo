@@ -1,12 +1,14 @@
 extensions [ gis palette ]
 globals [ cities-dataset
           rivers-dataset
+          arch-dataset
           countries-dataset
           elevation-dataset
           IslandsOccupied
 
 ]
 breed [ city-labels city-label ]
+breed [ arch-labels arch-label ]
 breed [ country-labels country-label ]
 breed [ country-vertices country-vertex ]
 breed [ river-labels river-label ]
@@ -28,7 +30,8 @@ to setup
   ; long as all of your datasets use the same coordinate system.
   ;gis:load-coordinate-system (word projection ".prj")
   ; Load all of our datasets
-  set cities-dataset gis:load-dataset "IslandPoints.shp"
+  set arch-dataset gis:load-dataset "Archipelagos.shp"
+  set cities-dataset gis:load-dataset "LapitaIslands.shp"
   ;set rivers-dataset gis:load-dataset "data/rivers.shp"
   set countries-dataset gis:load-dataset "FinalOceania.shp"
   ;set elevation-dataset gis:load-dataset "data/world-elevation.asc"
@@ -86,8 +89,8 @@ to setup
 
   ask patches [
     if(elevation > 0)[
-      ;set elevation (elevation / 2715)
-      set elevation (((elevation / 2715) * -1) + 1)
+      set elevation (elevation / 2715)
+      ;set elevation (((elevation / 2715) * -1) + 1)
       set area (area / 3578122)
       set rain (rain / 4603)
       ;set bio1 (bio1 / 27.5)
@@ -114,10 +117,11 @@ to setup
 
   set IslandsOccupied []
   reset-ticks
+
 end
 
 to go
-  output-type "timestep "
+  output-type "Timestep "
   output-type ticks
   output-type ": "
   ;ask patches[
@@ -127,7 +131,7 @@ to go
   ask groups [
 
     ;move 1
-    ifelse count groups-on patch-here <= (value) [
+    ifelse count groups-on patch-here <= (value) and ticks > 0 [
       set color black
       if random 20 = 1 [
         hatch 1
@@ -179,7 +183,7 @@ to go
 
   tick
   output-print " "
-  if ticks >= 55 [stop]
+  if ticks >= 52 [stop]
 end
 
 
@@ -220,33 +224,34 @@ end
 
 
 to display-countries
-  ;ask country-labels [ die ]
-  gis:set-drawing-color white
-  gis:draw countries-dataset 1
-  ;if label-countries
-  ;[ foreach gis:feature-list-of countries-dataset [ vector-feature ->
-  ;    let centroid gis:location-of gis:centroid-of vector-feature
-      ; centroid will be an empty list if it lies outside the bounds
-      ; of the current NetLogo world, as defined by our current GIS
-      ; coordinate transformation
-  ;    if not empty? centroid
-  ;    [ create-country-labels 1
-  ;      [ set xcor item 0 centroid
-  ;        set ycor item 1 centroid
-  ;        set size 0
-  ;        set label gis:property-value vector-feature "CNTRY_NAME"
-  ;      ]
-  ;    ]
-  ;  ]
-  ;]
+  ask country-labels [ die ]
+  ;gis:set-drawing-color white
+  ;gis:draw arch-dataset 1
+  if label-arch
+  [ foreach gis:feature-list-of arch-dataset [ vector-feature ->
+      let centroid gis:location-of gis:centroid-of vector-feature
+       ;centroid will be an empty list if it lies outside the bounds
+       ;of the current NetLogo world, as defined by our current GIS
+       ;coordinate transformation
+      if not empty? centroid
+      [ create-country-labels 1
+        [ set xcor item 0 centroid
+          set ycor item 1 centroid
+          set size 0
+          set label-color red
+          set label gis:property-value vector-feature "ARCH"
+        ]
+      ]
+    ]
+  ]
 end
 
 
 to display-islands
   ask city-labels [ die ]
   foreach gis:feature-list-of cities-dataset [ vector-feature ->
-    gis:set-drawing-color scale-color red (gis:property-value vector-feature "Area") 500000 1000
-    gis:fill vector-feature 2.0
+    ;gis:set-drawing-color red ;(gis:property-value vector-feature "Area") 500000 1000
+    ;gis:fill vector-feature 2.0
     if label-islands
     [ ; a feature in a point dataset may have multiple points, so we
       ; have a list of lists of points, which is why we need to use
@@ -256,11 +261,11 @@ to display-islands
       ; bounds of the current NetLogo world, as defined by our current
       ; coordinate transformation
       if not empty? location
-      [ create-city-labels 1
+      [ create-city-labels 2
         [ set xcor item 0 location
           set ycor item 1 location
           set size 0
-          set label gis:property-value vector-feature "Name"
+          set label gis:property-value vector-feature "IName"
         ]
       ]
     ]
@@ -306,7 +311,7 @@ to display-value-in-patches
 
   set-default-shape groups "person"
   ;set-default-size groups "1"
-  ask patches with [INAME != "Mussau" and ARCH = "Bismarcks" ][
+  ask patches with [ARCH = "Bismarcks" ][
     sprout-groups 1
     ;set size 1
     ;set color black
@@ -368,7 +373,7 @@ GRAPHICS-WINDOW
 -1
 4.0
 1
-8
+12
 1
 1
 1
@@ -387,10 +392,10 @@ ticks
 30.0
 
 BUTTON
-29
-24
-123
-62
+27
+14
+121
+52
 NIL
 setup
 NIL
@@ -404,11 +409,11 @@ NIL
 1
 
 BUTTON
-27
-76
-152
-109
-NIL
+28
+67
+153
+100
+display-arch
 display-countries
 NIL
 1
@@ -421,21 +426,21 @@ NIL
 1
 
 SWITCH
-33
-217
-156
-250
+28
+180
+151
+213
 label-islands
 label-islands
-1
+0
 1
 -1000
 
 BUTTON
-32
-173
-146
-206
+29
+144
+143
+177
 Display-Islands
 display-islands
 NIL
@@ -534,17 +539,17 @@ number-of-groups
 number-of-groups
 1
 500
-125.0
+130.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-30
-130
-93
-163
+31
+220
+94
+253
 NIL
 go
 T
@@ -845,16 +850,16 @@ HORIZONTAL
 PLOT
 661
 591
-1255
-904
-plot 1
-time
-number of groups
+1138
+808
+Archipelago Groups Populations 
+Timesteps
+Groups
 0.0
-25.0
+50.0
 0.0
-20.0
-true
+450.0
+false
 true
 "" ""
 PENS
@@ -863,7 +868,7 @@ PENS
 "ReefSantaCruz" 1.0 0 -7500403 true "" "plot count turtles with [archipelago = \"ReefSantaCruz\"]"
 "Vanuatu" 1.0 0 -955883 true "" "plot count turtles with [archipelago = \"Vanuatu\"]"
 "New Caledonia" 1.0 0 -6459832 true "" "plot count turtles with [archipelago = \"New Caledonia\"]"
-"Fiji" 1.0 0 -1184463 true "" "plot count turtles with [archipelago = \"Fiji\"]"
+"Fiji" 1.0 0 -10649926 true "" "plot count turtles with [archipelago = \"Fiji\"]"
 "Samoa" 1.0 0 -10899396 true "" "plot count turtles with [archipelago = \"Samoa\"]"
 "Tonga" 1.0 0 -16777216 true "" "plot count turtles with [archipelago = \"Tonga\"]"
 
@@ -883,24 +888,6 @@ setup - wait - select values - display value in patches - go.
 11
 0.0
 1
-
-PLOT
-1185
-21
-1385
-171
-Lapita Islands
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot count turtles with [islandname = \"Efate\"]"
 
 SLIDER
 29
@@ -950,6 +937,17 @@ NIL
 NIL
 NIL
 1
+
+SWITCH
+29
+105
+165
+138
+label-arch
+label-arch
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
