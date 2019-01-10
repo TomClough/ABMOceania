@@ -6,6 +6,8 @@ globals [ cities-dataset
           elevation-dataset
           IslandsOccupied
 
+          best-patches-move
+
 ]
 breed [ city-labels city-label ]
 breed [ arch-labels arch-label ]
@@ -116,6 +118,7 @@ to setup
   ]
 
   set IslandsOccupied []
+  set best-patches-move []
   reset-ticks
 
 end
@@ -189,36 +192,38 @@ end
 
 to move
 
-  ; let val-dist [distance myself] of patches
-  ;ask patches[
-    ;set value-distance 0
- ; ]
-  ;move-to one-of patches with [ current-value >= 1 ]
 
   if any? patches with [current-value >= 1 ] [
-
-  ;move-to min-one-of (patches with [current-value > 1 ] ) [distance myself] ; shortest distance but how to add in
 
   ;if not nobody
     if (count patches with [current-value >= 1 and distance myself < max-trip-distance]) > 0 [
       move-to max-one-of (patches with [current-value >= 1 and distance myself < max-trip-distance] ) [current-value - (distance myself * distance-weighting)]
     ]
 
-  ;move-to max-one-of (patches with [current-value >= 1] ) [current-value - (distance myself * distance-weighting)]
 
 
+  ;range expansion
+;  ask groups [
+;      ;show max-one-of (patches with [current-value >= 1 and distance myself < max-trip-distance] ) [current-value - (distance myself * distance-weighting)]
+;      ;put all in list then get one with highest current value;
+;      if not member? max-one-of (patches with [current-value >= 1 and distance myself < max-trip-distance] ) [current-value - (distance myself * distance-weighting)] best-patches-move [
+;         set best-patches-move lput max-one-of (patches with [current-value >= 1 and distance myself < max-trip-distance] ) [current-value - (distance myself * distance-weighting)] best-patches-move
+;      ]
+;    ]
+  ;show max-one-of best-patches-move [current-value]
+  ;show best-patches-move
+;  set best-patches-move sort-by [[t1 t2] -> [current-value] of t1 < [current-value] of t2] best-patches-move  ; sort the patches
+  ;show best-patches-move
+  ;show last best-patches-move
 
-  ;why does it work this way
+
+;  if (count patches with [current-value >= 1 and distance myself < max-trip-distance]) > 0 [
+;      move-to last best-patches-move
+;    ]
+
+  set best-patches-move []
+
   ]
-
-  ;move-to max-one-of (patches with [current-value > 1 ] ) [val-dist]
-
-  ; value - distance?
-  ; problem how do i get
-
-  ;move-to max-one-of (patches with [current-value > 1 ] ) [value-distance]
-
-  ; add slider for distance weighting
 
 end
 
@@ -266,8 +271,8 @@ to display-islands
       ; coordinate transformation
       if not empty? centroid ;location
       [ create-city-labels 2
-        [ set xcor item 0 location
-          set ycor item 1 location
+        [ set xcor item 0 centroid ;location
+          set ycor item 1 centroid ;location
           set size 0.5
           set shape "circle 2"
           set color red
@@ -320,7 +325,7 @@ to display-value-in-patches
   set-default-shape groups "person"
   ;set-default-size groups "1"
   ask patches with [ARCH = "Bismarcks" ][
-    sprout-groups 1
+    sprout-groups spawn-number
     ;set size 1
     ;set color black
     ;set archipelago [ARCH] of patch-here
@@ -352,7 +357,7 @@ to display-order
    ask patches
   [
     ifelse (elevation > 0)
-    [ set pcolor scale-color green tstep2 0 35
+    [ set pcolor scale-color green tstep2 0 45
       ;set pcolor palette:scale-gradient [[255 0 0] [0 255 0] [0 0 255]] tstep2 0 55
     ]
     [ set pcolor blue ]
@@ -365,7 +370,7 @@ to display-order2
    ask patches
   [
     ifelse (elevation > 0)
-    [ set pcolor scale-color green tstep 0 35
+    [ set pcolor scale-color green tstep 0 45
       ;set pcolor palette:scale-gradient [[255 0 0] [0 255 0] [0 0 255]] tstep2 0 55
     ]
     [ set pcolor blue ]
@@ -487,7 +492,7 @@ rain-weighting
 rain-weighting
 0
 10
-0.0
+2.0
 0.1
 1
 NIL
@@ -502,7 +507,7 @@ area-weighting
 area-weighting
 0
 10
-2.0
+0.0
 0.1
 1
 NIL
@@ -517,7 +522,7 @@ elevation-weighting
 elevation-weighting
 0
 10
-2.0
+0.0
 0.1
 1
 NIL
@@ -532,23 +537,8 @@ distance-weighting
 distance-weighting
 0
 0.5
-0.0
-0.01
-1
-NIL
-HORIZONTAL
-
-SLIDER
-30
-295
-202
-328
-number-of-groups
-number-of-groups
-1
-500
-130.0
-1
+0.015
+0.001
 1
 NIL
 HORIZONTAL
@@ -579,7 +569,7 @@ num-var-used
 num-var-used
 1
 21
-2.0
+1.0
 1
 1
 NIL
@@ -860,20 +850,20 @@ PLOT
 591
 1138
 808
-Archipelago Groups Populations 
+Archipelago Group Populations 
 Timesteps
 Groups
 0.0
-50.0
+40.0
 0.0
-450.0
+350.0
 false
 true
 "" ""
 PENS
 "Bismarcks" 1.0 0 -11085214 true "" "plot count turtles with [archipelago = \"Bismarcks\"]"
 "Solomons" 1.0 0 -2674135 true "" "plot count turtles with [archipelago = \"Solomons\"]"
-"ReefSantaCruz" 1.0 0 -7500403 true "" "plot count turtles with [archipelago = \"ReefSantaCruz\"]"
+"Reef/Santa Cruz" 1.0 0 -7500403 true "" "plot count turtles with [archipelago = \"ReefSantaCruz\"]"
 "Vanuatu" 1.0 0 -955883 true "" "plot count turtles with [archipelago = \"Vanuatu\"]"
 "New Caledonia" 1.0 0 -6459832 true "" "plot count turtles with [archipelago = \"New Caledonia\"]"
 "Fiji" 1.0 0 -10649926 true "" "plot count turtles with [archipelago = \"Fiji\"]"
@@ -905,8 +895,8 @@ SLIDER
 max-trip-distance
 max-trip-distance
 0
-220
-220.0
+300
+300.0
 1
 1
 NIL
@@ -956,6 +946,21 @@ label-arch
 0
 1
 -1000
+
+SLIDER
+25
+304
+197
+337
+spawn-number
+spawn-number
+0
+2
+1.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?

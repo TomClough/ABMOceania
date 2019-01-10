@@ -192,25 +192,17 @@ end
 
 to move
 
-  ; let val-dist [distance myself] of patches
-  ;ask patches[
-    ;set value-distance 0
- ; ]
-  ;move-to one-of patches with [ current-value >= 1 ]
 
   if any? patches with [current-value >= 1 ] [
 
-  ;move-to min-one-of (patches with [current-value > 1 ] ) [distance myself] ; shortest distance but how to add in
-
   ;if not nobody
-    if (count patches with [current-value >= 1 and distance myself < max-trip-distance]) > 0 [
-      move-to max-one-of (patches with [current-value >= 1 and distance myself < max-trip-distance] ) [current-value - (distance myself * distance-weighting)]
-    ]
+    ;if (count patches with [current-value >= 1 and distance myself < max-trip-distance]) > 0 [
+    ;  move-to max-one-of (patches with [current-value >= 1 and distance myself < max-trip-distance] ) [current-value - (distance myself * distance-weighting)]
+    ;]
 
-  ;move-to max-one-of (patches with [current-value >= 1] ) [current-value - (distance myself * distance-weighting)]
 
-  ]
 
+  ;range expansion
   ask groups [
       ;show max-one-of (patches with [current-value >= 1 and distance myself < max-trip-distance] ) [current-value - (distance myself * distance-weighting)]
       ;put all in list then get one with highest current value;
@@ -219,13 +211,19 @@ to move
       ]
     ]
   ;show max-one-of best-patches-move [current-value]
-  show best-patches-move
-  set best-patches-move sort-by [[t1 t2] -> [current-value] of t1 < [current-value] of t2] best-patches-move
-  show best-patches-move
-  show
+  ;show best-patches-move
+  set best-patches-move sort-by [[t1 t2] -> [current-value] of t1 < [current-value] of t2] best-patches-move  ; sort the patches
+  ;show best-patches-move
+  ;show last best-patches-move
+
+
+  if (count patches with [current-value >= 1 and distance myself < max-trip-distance]) > 0 [
+      move-to last best-patches-move
+    ]
+
   set best-patches-move []
 
-
+  ]
 
 end
 
@@ -494,7 +492,7 @@ rain-weighting
 rain-weighting
 0
 10
-0.0
+2.0
 0.1
 1
 NIL
@@ -509,7 +507,7 @@ area-weighting
 area-weighting
 0
 10
-4.0
+0.0
 0.1
 1
 NIL
@@ -524,7 +522,7 @@ elevation-weighting
 elevation-weighting
 0
 10
-4.0
+0.0
 0.1
 1
 NIL
@@ -539,7 +537,7 @@ distance-weighting
 distance-weighting
 0
 0.5
-0.013
+0.015
 0.001
 1
 NIL
@@ -552,7 +550,7 @@ BUTTON
 253
 NIL
 go
-NIL
+T
 1
 T
 OBSERVER
@@ -571,7 +569,7 @@ num-var-used
 num-var-used
 1
 21
-2.0
+1.0
 1
 1
 NIL
@@ -852,20 +850,20 @@ PLOT
 591
 1138
 808
-Archipelago Groups Populations 
+Archipelago Group Populations 
 Timesteps
 Groups
 0.0
-50.0
+40.0
 0.0
-675.0
+350.0
 false
 true
 "" ""
 PENS
 "Bismarcks" 1.0 0 -11085214 true "" "plot count turtles with [archipelago = \"Bismarcks\"]"
 "Solomons" 1.0 0 -2674135 true "" "plot count turtles with [archipelago = \"Solomons\"]"
-"ReefSantaCruz" 1.0 0 -7500403 true "" "plot count turtles with [archipelago = \"ReefSantaCruz\"]"
+"Reef/Santa Cruz" 1.0 0 -7500403 true "" "plot count turtles with [archipelago = \"ReefSantaCruz\"]"
 "Vanuatu" 1.0 0 -955883 true "" "plot count turtles with [archipelago = \"Vanuatu\"]"
 "New Caledonia" 1.0 0 -6459832 true "" "plot count turtles with [archipelago = \"New Caledonia\"]"
 "Fiji" 1.0 0 -10649926 true "" "plot count turtles with [archipelago = \"Fiji\"]"
@@ -958,7 +956,7 @@ spawn-number
 spawn-number
 0
 2
-2.0
+1.0
 1
 1
 NIL
